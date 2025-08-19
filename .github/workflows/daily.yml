@@ -13,7 +13,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install deps
-        run: pip install requests pyyaml
+        run: pip install requests pyyaml pytz
       - name: Run script
         env:
           FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
