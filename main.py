@@ -6,8 +6,12 @@ import hmac
 
 # 1. 取今日热点
 def get_hot():
-    data = requests.get("https://api-hot.deno.dev/top10", timeout=10).json()
-    return data[0]["title"]
+    url = "https://api.hotpepper.cn/api/v1/top10"
+    try:
+        data = requests.get(url, timeout=10).json()
+        return data[0]["title"]
+    except Exception:
+        return "今日暂无热点数据"
 
 # 2. 推送到飞书
 def push_feishu(text):
