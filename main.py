@@ -15,7 +15,10 @@ def get_hot():
 
 # 2. 推送到飞书
 def push_feishu(text):
-    ts = str(int(datetime.datetime.now().timestamp()))
+    # 用东八区时间
+    import pytz, calendar
+    tz = pytz.timezone('Asia/Shanghai')
+    ts = str(calendar.timegm(datetime.datetime.now(tz).utctimetuple()))
     secret = os.getenv("FEISHU_SECRET", "")
     if secret:
         string_to_sign = f"{ts}\n{secret}"
@@ -26,14 +29,10 @@ def push_feishu(text):
         "timestamp": ts,
         "sign": sign,
         "msg_type": "post",
-        "content": {
-            "post": {
-                "zh_cn": {
-                    "title": f"今日口播热点 {datetime.date.today()}",
-                    "content": [[{"tag": "text", "text": text}]]
-                }
-            }
-        }
+        "content": {"post": {"zh_cn": {
+            "title": f"今日口播热点 {datetime.date.today()}",
+            "content": [[{"tag": "text", "text": text}]]
+        }}}
     }
     r = requests.post(os.getenv("FEISHU_WEBHOOK"), json=body)
     print(r.text)
