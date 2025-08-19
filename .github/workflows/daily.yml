@@ -1,0 +1,22 @@
+name: TrendRadar Daily
+on:
+  schedule:
+    - cron: "0 8,18 * * *"
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install requests pyyaml
+      - name: Run script
+        env:
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+          FEISHU_SECRET: ${{ secrets.FEISHU_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python main.py
