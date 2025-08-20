@@ -8,21 +8,17 @@ import random
 
 # 8 大平台热点轮询
 def get_hot():
-    sources = {
-        "微博": "https://api-hot.deno.dev/weibo",
-        "知乎": "https://api-hot.deno.dev/zhihu",
-        "头条": "https://api-hot.deno.dev/toutiao",
-        "百度": "https://api-hot.deno.dev/baidu",
-        "B站": "https://api-hot.deno.dev/bilibili",
-        "抖音": "https://api-hot.deno.dev/douyin",
-        "36氪": "https://api-hot.deno.dev/36kr",
-        "财联社": "https://api-hot.deno.dev/cailian"
-    }
+sources = {
+    "微博": "https://weibo.com/ajax/side/hotSearch",
+    "知乎": "https://api.zhihu.com/topstory/hot-lists/total",
+    "头条": "https://www.toutiao.com/hot-event/hot-board/"
+}
 
     hot_list = []
     for name, url in sources.items():
         try:
             data = requests.get(url, timeout=5).json()
+            headers={"User-Agent": "Mozilla/5.0"}
             for item in data[:2]:
                 hot_list.append(f"【{name}】{item['title']}")
             if len(hot_list) >= 3:
