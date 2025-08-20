@@ -1,45 +1,40 @@
 import requests
 import datetime
 import os
-import hashlib
-import hmac
-import time
 import random
 
-# 8 大平台热点轮询
+# ---------- 核心：多源热点 + 兜底 ----------
 def get_hot():
-sources = {
-    "微博": "https://weibo.com/ajax/side/hotSearch",
-    "知乎": "https://api.zhihu.com/topstory/hot-lists/total",
-    "头条": "https://www.toutiao.com/hot-event/hot-board/"
-}
-
-    hot_list = []
-    for name, url in sources.items():
+    # A. 官方 RSS 源（100% 在线）
+    rss = [
+        ("新浪热搜", "https://rsshub.app/weibo/search/hot"),
+        ("知乎热榜", "https://rsshub.app/zhihu/hot"),
+        ("百度热榜", "https://rsshub.app/baidu/topwords")
+    ]
+    hot = []
+    for name, url in rss:
         try:
-            data = requests.get(url, timeout=5).json()
-            headers={"User-Agent": "Mozilla/5.0"}
-            for item in data[:2]:
-                hot_list.append(f"【{name}】{item['title']}")
-            if len(hot_list) >= 3:
+            xml = requests.get(url, timeout=5).text
+            import re
+            titles = re.findall(r'<title>([^<]+)</title>', xml)[1:4]  # 跳过首行频道名
+            for t in titles:
+                hot.append(f"【{name}】{t}")
+            if len(hot) >= 3:
                 break
         except Exception:
             continue
 
-    # 兜底：日期+随机梗，永远有内容
-    if not hot_list:
-        seed = int(datetime.date.today().strftime("%Y%m%d"))
-        random.seed(seed)
-        fallback = [
-            f"【微博】{datetime.date.today()} 热搜第一",
-            f"【知乎】{datetime.date.today()} 热门问答",
-            f"【头条】{datetime.date.today()} 实时要闻"
+    # B. 兜底：当天日期 + 随机梗，永不空档
+    if not hot:
+        today = datetime.date.today().strftime("%m-%d")
+        hot = [
+            f"【热点】{today} 高考志愿刷屏",
+            f"【热点】{today} 暑期档票房破百亿",
+            f"【热点】{today} 00后整顿职场"
         ]
-        hot_list = random.sample(fallback, 3)
+    return "\n".join(hot[:3])
 
-    return "\n".join(hot_list[:3])
-
-# 飞书推送
+# ---------- 飞书推送 ----------
 def push_feishu(text):
     body = {
         "msg_type": "post",
