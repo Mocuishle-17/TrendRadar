@@ -1,0 +1,26 @@
+name: AI-Rewrite Hotspot
+on:
+  schedule:
+    - cron: "0 8,18 * * *"
+  workflow_dispatch:
+
+jobs:
+  rewrite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install requests pyyaml
+      - name: AI rewrite & push
+        env:
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+          FEISHU_SECRET: ${{ secrets.FEISHU_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          # 用硅基流动
+          export OPENAI_BASE_URL=https://api.siliconflow.cn/v1
+          python main.py
